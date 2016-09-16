@@ -1,0 +1,70 @@
+{load_file("nrngui.hoc")}
+
+begintemplate Cell
+public soma, syn, stim
+create soma
+objref syn, stim
+proc init() {
+  soma {
+    nseg=1
+    diam = .1  L = .1
+    insert hhderiv
+    insert na
+    nai0_na = 30
+    nao0_na = 120
+    stim = new IClamp(.5)
+    stim.amp= .00001
+    stim.dur = 0.3
+  }
+}
+
+endtemplate Cell
+
+ncell = 1
+objref pc, cell, cells, nc, netcons, st, stims, nil
+pc = new ParallelContext()
+
+cells = new List()
+
+for (gid = pc.id; gid < ncell; gid += pc.nhost) {
+  pc.set_gid2node(gid, pc.id)
+  cell = new Cell()
+  cell.soma pc.cell(gid, new NetCon(&cell.soma.v(.5), nil))
+  cells.append(cell)
+}
+
+objref tvec, idvec
+tvec = new Vector()
+idvec = new Vector()
+pc.spike_record(-1, tvec, idvec)
+
+cvode.cache_efficient(1)
+pc.set_maxstep(10)
+stdinit()
+
+proc pcell() {localobj s
+  s = new String()
+  sprint(s.s, "t%g", t)
+  pc.prcellstate($1, s.s)
+}
+
+pc.nrnbbcore_write("testconcdat")
+//pcell(0)
+tsav = startsw()
+pc.psolve(10)
+if (pc.id == 0) { printf("psolve time %g\n", startsw() - tsav) }
+//pcell(0)
+
+strdef s
+sprint(s, "out%d.dat", pc.id)
+objref f
+f = new File()
+f.wopen(s)
+for i=0, tvec.size-1 {
+  f.printf("%g %d\n", tvec.x[i], idvec.x[i])
+}
+f.close()
+
+pc.barrier()
+//quit()
+

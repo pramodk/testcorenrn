@@ -6,7 +6,7 @@
 
 nrnivmodl
 
-names="deriv gf kin"
+names="deriv gf kin conc"
 
 for i in $names ; do
   mkdir -p test${i}dat
