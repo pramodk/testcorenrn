@@ -66,5 +66,5 @@ for i=0, tvec.size-1 {
 f.close()
 
 pc.barrier()
-//quit()
+quit()
 
