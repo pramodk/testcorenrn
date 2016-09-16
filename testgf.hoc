@@ -19,7 +19,7 @@ proc init() {
 
 endtemplate Cell
 
-ncell = 10000
+ncell = 100
 objref pc, cell, cells, nc, netcons, st, stims, nil
 pc = new ParallelContext()
 
