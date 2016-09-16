@@ -1,0 +1,38 @@
+#!/bin/sh
+
+#prepare nrniv results
+# use a version of NEURON that has an hh.mod that is compatible with coreneuron
+# eg. nrnenv nrncore
+
+nrnivmodl
+
+names="deriv gf kin"
+
+for i in $names ; do
+  mkdir -p test${i}dat
+done
+
+for i in $names ; do
+  nrniv test${i}.hoc
+  cat out[0-9].dat | sort -k 1n,1n -k 2n,2n > out_nrn_${i}.spk
+  rm out[0-9].dat
+done
+
+#prepare coreneuron executable
+
+mkdir -p modcore
+cp *.mod modcore
+
+pgenv #How I set up my environment in preparation for...
+
+corenrnbuild -m modcore -b buildgpu -s $HOME/bb/coreneuron -i $HOME/bb/install
+
+for i in $names ; do
+  buildgpu/bin/coreneuron_exec -d test${i}dat --cell_permute=1 -e 10 --gpu
+  cat out[0-9].dat | sort -k 1n,1n -k 2n,2n > out_gpu_${i}.spk
+  rm out[0-9].dat
+done
+
+for i in $names ; do
+  diff -w -q out_nrn_${i}.spk out_gpu_${i}.spk
+done
