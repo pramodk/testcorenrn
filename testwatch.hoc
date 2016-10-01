@@ -1,0 +1,70 @@
+{load_file("nrngui.hoc")}
+
+begintemplate Cell
+public soma, syn, stim, hhabs
+create soma
+objref syn, stim[3], hhabs
+proc init() {local i
+  soma {
+    nseg=1
+    diam = 10  L = 100
+    hhabs = new hhwatch(0.5)
+    for i=0, 2 {
+      stim[i] = new IClamp(.5)
+      stim[i].del = 3*i
+      stim[i].amp = $1
+      stim[i].dur = 0.5
+    }
+  }
+}
+
+endtemplate Cell
+
+ncell = 3
+objref pc, cell, cells, nc, netcons, st, stims, nil
+pc = new ParallelContext()
+
+cells = new List()
+
+for (gid = pc.id; gid < ncell; gid += pc.nhost) {
+  pc.set_gid2node(gid, pc.id)
+  cell = new Cell(1 + .5*gid/ncell)
+  cell.soma pc.cell(gid, new NetCon(&cell.soma.v(.5), nil))
+  cells.append(cell)
+}
+
+objref tvec, idvec
+tvec = new Vector()
+idvec = new Vector()
+pc.spike_record(-1, tvec, idvec)
+
+cvode.cache_efficient(1)
+pc.set_maxstep(10)
+stdinit()
+
+proc pcell() {localobj s
+  s = new String()
+  sprint(s.s, "t%g", t)
+  pc.prcellstate($1, s.s)
+}
+
+pc.nrnbbcore_write("testwatchdat")
+//pcell(0)
+tsav = startsw()
+pc.psolve(10)
+if (pc.id == 0) { printf("psolve time %g\n", startsw() - tsav) }
+//pcell(0)
+
+strdef s
+sprint(s, "out%d.dat", pc.id)
+objref f
+f = new File()
+f.wopen(s)
+for i=0, tvec.size-1 {
+  f.printf("%g %d\n", tvec.x[i], idvec.x[i])
+}
+f.close()
+
+pc.barrier()
+quit()
+
