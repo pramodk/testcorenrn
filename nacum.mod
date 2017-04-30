@@ -19,12 +19,12 @@ UNITS {
 
 PARAMETER {
 	nabath = 116	(mM)
-	diam1 = 0.1		(um)
 	ina		(mA/cm2)
 	nai0 = 10 (mM)
 	nao0 = 140 (mM)
 }
 
+ASSIGNED { diam (um) }
 
 STATE {
 	nai (mM)
@@ -42,6 +42,6 @@ BREAKPOINT {
 }
 
 DERIVATIVE state {
-	nai' = -ina * 4/(diam1*FARADAY) * (1e4)
+	nai' = -ina * 4/(diam*FARADAY) * (1e4)
 	nao' = 0
 }
