@@ -338,7 +338,6 @@ FUNCTION exptrap(loc,x) {
 }
 
 VERBATIM
-#if !NRNBBCORE
 static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargsproto_) {
 	/* error if using the legacy normrand */
 	if (!_p_donotuse) {
@@ -347,6 +346,7 @@ static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargspro
 	}
 	if (d) {
 		uint32_t* di = ((uint32_t*)d) + *offset;
+#if !NRNBBCORE
 		if (_ran_compat == 1) { 
 			void** pv = (void**)(&_p_donotuse);
 			/* error if not using Random123 generator */
@@ -355,6 +355,9 @@ static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargspro
 				assert(0);
 			}
 		}else{
+#else
+	{
+#endif
 			nrnran123_State** pv = (nrnran123_State**)(&_p_donotuse);
 			nrnran123_getids3(*pv, di, di+1, di+2);
 		}
@@ -362,7 +365,6 @@ static void bbcore_write(double* x, int* d, int* xx, int *offset, _threadargspro
 	}
 	*offset += 3;
 }
-#endif
 
 static void bbcore_read(double* x, int* d, int* xx, int* offset, _threadargsproto_) {
 	assert(!_p_donotuse);
