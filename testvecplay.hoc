@@ -3,13 +3,16 @@
 begintemplate Cell
 public soma, syn, stim
 create soma
-objref syn, stim, ramps_t, ramps_i
-proc init() {local tt
+objref syn, stim, ramps_t, ramps_i, r
+proc init() {local tt, x
+  r = new Random()
+  r.Random123($1, 0, 0)
   ramps_t = new Vector()
   ramps_i = new Vector()
-  for (tt=0; tt < 50; tt = tt + 5) {
-    ramps_t.append(tt, tt+1, tt+1, tt+5)
-    ramps_i.append(0, .01+$1, 0, -.001)
+  for (tt=0; tt < 100; tt = tt + 5) {
+    x = r.uniform(.5, 1.5)
+    ramps_t.append(tt, tt+x, tt+x, tt+5)
+    ramps_i.append(0, .01+.001*($1+1), 0, -.001)
   }
   soma {
     nseg=1
@@ -24,7 +27,7 @@ proc init() {local tt
 
 endtemplate Cell
 
-ncell = 1
+ncell = 10
 objref pc, cell, cells, nc, netcons, st, stims, nil
 pc = new ParallelContext()
 
@@ -32,7 +35,7 @@ cells = new List()
 
 for (gid = pc.id; gid < ncell; gid += pc.nhost) {
   pc.set_gid2node(gid, pc.id)
-  cell = new Cell(.001*(gid+1))
+  cell = new Cell(gid, ncell)
   cell.soma pc.cell(gid, new NetCon(&cell.soma.v(.5), nil))
 //  cell.syn.noiseFromRandom123(gid,2,3)
   cells.append(cell)
@@ -56,7 +59,7 @@ proc pcell() {localobj s
 pc.nrnbbcore_write("testvecplaydat")
 //pcell(0)
 tsav = startsw()
-pc.psolve(20)
+pc.psolve(100)
 if (pc.id == 0) { printf("psolve time %g\n", startsw() - tsav) }
 //pcell(0)
 

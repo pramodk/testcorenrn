@@ -17,24 +17,27 @@ proc init() {
 
 endtemplate Cell
 
-ncell = 1
-objref pc, cell, cells, nc, netcons, st, stims, nclist, nil
+ncell = 10
+objref pc, cell, cells, nc, netcons, st, stims, nclist, nil, r
 pc = new ParallelContext()
 
 cells = new List()
 nclist = new List()
 
 for (gid = pc.id; gid < ncell; gid += pc.nhost) {
+  r = new Random()
+  r.Random123(gid, 0, 0)
+  r.uniform(0,1)
   pc.set_gid2node(gid, pc.id)
   cell = new Cell()
   cell.soma pc.cell(gid, new NetCon(&cell.soma.v(.5), nil))
 //  cell.syn.noiseFromRandom123(gid,2,3)
   cells.append(cell)
 
-  // all cell syn have a source of 1000
-  nc = pc.gid_connect(1000, cell.syn)
-  nc.weight = .01
-  nc.delay = 1
+  // all cell syn have a source of 1000+gid%5
+  nc = pc.gid_connect(1000+gid%5, cell.syn)
+  nc.weight = .01 + r.repick()*.01
+  nc.delay = 1 + r.repick()
   nclist.append(nc)
 }
 
@@ -45,7 +48,7 @@ gidstim = new Vector(2000)
 gidstim.fill(2000)
 for i=0, tstim.size-1 {
   tstim.x[i] = int(i/100)*5
-  if (i%100 == 0) { gidstim.x[i] = 1000 }
+  gidstim.x[i] = 1000+i%100
 }
 patstim = new PatternStim()
 patstim.play(tstim, gidstim)

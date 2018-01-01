@@ -3,24 +3,32 @@
 begintemplate Cell
 public soma, syn, stim, hhabs
 create soma
-objref syn, stim[3], hhabs
-proc init() {local i
+objref syn, stim[21], hhabs, r
+proc init() {local i, x
+  r = new Random()
+  r.Random123($1, 0, 0)
+  r.uniform(2,5)
   soma {
     nseg=1
-    diam = 10  L = 100
+    diam = 10  L = 3
     hhabs = new hhwatch(0.5)
-    for i=0, 2 {
+    gna_hhwatch = .002
+    gk_hhwatch = .001
+    gpas_hhwatch = .0005
+    x = 0
+    for i=0, 20 {
+      x += r.uniform(2,5)
       stim[i] = new IClamp(.5)
-      stim[i].del = 3*i
-      stim[i].amp = $1
-      stim[i].dur = 0.5
+      stim[i].del = x
+      stim[i].amp = r.uniform(.2, .3)
+      stim[i].dur = 0.1
     }
   }
 }
 
 endtemplate Cell
 
-ncell = 3
+ncell = 10
 objref pc, cell, cells, nc, netcons, st, stims, nil
 pc = new ParallelContext()
 
@@ -28,7 +36,7 @@ cells = new List()
 
 for (gid = pc.id; gid < ncell; gid += pc.nhost) {
   pc.set_gid2node(gid, pc.id)
-  cell = new Cell(1 + .5*gid/ncell)
+  cell = new Cell(gid, ncell)
   cell.soma pc.cell(gid, new NetCon(&cell.soma.v(.5), nil))
   cells.append(cell)
 }
@@ -51,7 +59,7 @@ proc pcell() {localobj s
 pc.nrnbbcore_write("testwatchdat")
 //pcell(0)
 tsav = startsw()
-pc.psolve(10)
+pc.psolve(100)
 if (pc.id == 0) { printf("psolve time %g\n", startsw() - tsav) }
 //pcell(0)
 
