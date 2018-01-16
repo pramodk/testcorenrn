@@ -4,6 +4,7 @@ set -e -x
 name=testpatstim
 name=testwatch
 name=testvecplay
+name=testbbcore
 
 M=$HOME/models/testcorenrn
 
@@ -21,7 +22,10 @@ CP=1
 P='mpiexec -n 6 bin/coreneuron_exec -mpi'
 P='bin/coreneuron_exec'
 
-spargs="-d $M/${name}dat --pattern $M/patstim.spk"
+spargs="-d $M/${name}dat"
+if test $name = "testpatstim" ; then
+  spargs="-d $M/${name}dat --pattern $M/patstim.spk"
+fi
 
 # standard spikes in $t_end ms
 rm -rf out*.dat
