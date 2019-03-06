@@ -49,7 +49,7 @@ if(!use_coreneuron){
    pc.nrnbbcore_write("testgfdat")
 }
 prun("")
-spike2file()
+spike2file("gf")
 
 pc.barrier()
 quit()

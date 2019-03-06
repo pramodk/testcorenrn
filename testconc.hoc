@@ -47,7 +47,7 @@ if(!use_coreneuron){
    pc.nrnbbcore_write("testconcdat")
 }
 prun("")
-spike2file()
+spike2file("conc")
 
 pc.barrier()
 quit()

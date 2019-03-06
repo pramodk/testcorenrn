@@ -75,7 +75,7 @@ if(!use_coreneuron){
    pc.nrnbbcore_write("testpatstimdat")
 }
 prun("--pattern patstim.spk")
-spike2file()
+spike2file("patstim")
 
 pc.barrier()
 quit()

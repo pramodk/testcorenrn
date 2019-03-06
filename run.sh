@@ -8,8 +8,8 @@ done
 
 for i in $names ; do
   ./x86_64/special -c sim_time=100 test${i}.hoc
-  cat out.dat | sort -k 1n,1n -k 2n,2n > out_nrn_${i}.spk
-  rm out.dat
+  cat out${i}.dat | sort -k 1n,1n -k 2n,2n > out_nrn_${i}.spk
+  rm out${i}.dat
 done
 
 #prepare coreneuron executable

@@ -50,7 +50,7 @@ if(!use_coreneuron){
    pc.nrnbbcore_write("testderivdat")
 }
 prun("")
-spike2file()
+spike2file("deriv")
 
 pc.barrier()
 quit()

@@ -13,7 +13,7 @@ proc spike2file() { localobj outf, s
         return
     }
     s = new String()
-    sprint(s.s, "out.dat")
+    sprint(s.s, "out%s.dat", $s1)
     outf = new File()
     if (pc.id == 0) {outf.wopen(s.s) outf.close }
     for pnm.serialize() {

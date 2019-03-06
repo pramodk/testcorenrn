@@ -55,7 +55,7 @@ if(!use_coreneuron){
    pc.nrnbbcore_write("testvecplaydat")
 }
 prun("")
-spike2file()
+spike2file("vecplay")
 
 pc.barrier()
 quit()
