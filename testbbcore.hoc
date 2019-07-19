@@ -10,6 +10,13 @@ tvec = new Vector()
 idvec = new Vector()
 
 cells = new List()
+netcons = new List()
+
+create dummy_cell
+pc.set_gid2node(ncell, pc.id)
+nc = new NetCon(&dummy_cell.v(.5), nil)
+netcons.append(nc)
+pc.cell(ncell, nc)
 
 for (gid = pc.id; gid < ncell; gid += pc.nhost) {
   pc.set_gid2node(gid, pc.id)
@@ -19,7 +26,9 @@ for (gid = pc.id; gid < ncell; gid += pc.nhost) {
   cell.noise = 1
   cell.number=1e9
   cell.noiseFromRandom123(gid, 2, 3)
-  pc.cell(gid, new NetCon(cell, nil))
+  nc = new NetCon(cell, nil)
+  netcons.append(nc)
+  pc.cell(gid, nc)
   cells.append(cell)
 }
 
