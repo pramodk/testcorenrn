@@ -54,7 +54,7 @@ proc pcell() {localobj s
 pc.nrnbbcore_write("testderivdat")
 //pcell(0)
 tsav = startsw()
-pc.psolve(10)
+pc.psolve(100)
 if (pc.id == 0) { printf("psolve time %g\n", startsw() - tsav) }
 //pcell(0)
 
