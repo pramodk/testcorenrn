@@ -7,7 +7,7 @@
 nrnivmodl mod
 nrnivmodl-core mod
 
-names="deriv gf kin conc watch"
+names="deriv gf kin conc watch vecplay"
 
 for i in $names ; do
   x86_64/special -c sim_time=100 test${i}.hoc
@@ -16,11 +16,18 @@ for i in $names ; do
 done
 
 for i in $names ; do
-  srun -n 1 x86_64/special-core -d test${i}dat --cell-permute 1 -e 100 --gpu --mpi
-  cat out.dat | sort -k 1n,1n -k 2n,2n > out_gpu_${i}.spk
+  x86_64/special -c sim_time=100 -c coreneuron=1 test${i}.hoc
+  cat out.dat | sort -k 1n,1n -k 2n,2n > out_core_online_${i}.spk
   rm out.dat
 done
 
 for i in $names ; do
-  diff -w -q out_nrn_${i}.spk out_gpu_${i}.spk
+  x86_64/special-core -d test${i}dat --cell-permute 1 -e 100
+  cat out.dat | sort -k 1n,1n -k 2n,2n > out_core_file_${i}.spk
+  rm out.dat
+done
+
+for i in $names ; do
+  diff -w -q out_nrn_${i}.spk out_core_online_${i}.spk
+  diff -w -q out_nrn_${i}.spk out_core_file_${i}.spk
 done
